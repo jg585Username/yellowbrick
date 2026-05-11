@@ -80,6 +80,18 @@ class PCA(ProjectionVisualizer):
         Boolean that indicates if the user wants to project the features
         in the projected space. If True the plot will be similar to a biplot.
 
+    arrow_kwargs : dict, default: None
+        A dictionary of keyword arguments passed to ``ax.arrow()`` (2D) or
+        ``ax.plot()`` (3D) when drawing the feature projection arrows. Use this
+        to override properties such as ``color``, ``head_width``, or ``width``.
+        Unspecified properties fall back to their defaults (e.g. ``color="r"``).
+
+    label_kwargs : dict, default: None
+        A dictionary of keyword arguments passed to ``ax.text()`` when drawing
+        the feature projection labels. Use this to override properties such as
+        ``color`` or ``fontsize``. Unspecified properties fall back to their
+        defaults (e.g. ``color="r"``).
+
     colors : list or tuple, default: None
         A single color to plot all instances as or a list of colors to color each
         instance according to its class in the discrete case or as an ordered
@@ -156,6 +168,8 @@ class PCA(ProjectionVisualizer):
         scale=True,
         projection=2,
         proj_features=False,
+        arrow_kwargs=None,
+        label_kwargs=None,
         colors=None,
         colormap=None,
         alpha=0.75,
@@ -179,6 +193,8 @@ class PCA(ProjectionVisualizer):
         # Data Parameters
         self.scale = scale
         self.proj_features = proj_features
+        self.arrow_kwargs = arrow_kwargs or {}
+        self.label_kwargs = label_kwargs or {}
 
         # Create the PCA transformer
         self.pca_transformer = Pipeline(
@@ -394,6 +410,11 @@ class PCA(ProjectionVisualizer):
         y_vector = self.pca_components_[1]
         max_x = max(Xp[:, 0])
         max_y = max(Xp[:, 1])
+        arrow_props = {"color": "r", "head_width": 0.05, "width": 0.005}
+        arrow_props.update(self.arrow_kwargs)
+        label_props = {"color": "r"}
+        label_props.update(self.label_kwargs)
+
         if self.projection == 2:
             for i in range(self.pca_components_.shape[1]):
                 self.ax.arrow(
@@ -401,15 +422,13 @@ class PCA(ProjectionVisualizer):
                     y=0,
                     dx=x_vector[i] * max_x,
                     dy=y_vector[i] * max_y,
-                    color="r",
-                    head_width=0.05,
-                    width=0.005,
+                    **arrow_props,
                 )
                 self.ax.text(
                     x_vector[i] * max_x * 1.05,
                     y_vector[i] * max_y * 1.05,
                     self.features_[i],
-                    color="r",
+                    **label_props,
                 )
         elif self.projection == 3:
             z_vector = self.pca_components_[2]
@@ -419,14 +438,14 @@ class PCA(ProjectionVisualizer):
                     [0, x_vector[i] * max_x],
                     [0, y_vector[i] * max_y],
                     [0, z_vector[i] * max_z],
-                    color="r",
+                    **arrow_props,
                 )
                 self.ax.text(
                     x_vector[i] * max_x * 1.05,
                     y_vector[i] * max_y * 1.05,
                     z_vector[i] * max_z * 1.05,
                     self.features_[i],
-                    color="r",
+                    **label_props,
                 )
         else:
             raise YellowbrickValueError("Projection dimensions must be either 2 or 3")
@@ -472,6 +491,8 @@ def pca_decomposition(
     scale=True,
     projection=2,
     proj_features=False,
+    arrow_kwargs=None,
+    label_kwargs=None,
     colors=None,
     colormap=None,
     alpha=0.75,
@@ -526,6 +547,18 @@ def pca_decomposition(
     proj_features : bool, default: False
         Boolean that indicates if the user wants to project the features
         in the projected space. If True the plot will be similar to a biplot.
+
+    arrow_kwargs : dict, default: None
+        A dictionary of keyword arguments passed to ``ax.arrow()`` (2D) or
+        ``ax.plot()`` (3D) when drawing the feature projection arrows. Use this
+        to override properties such as ``color``, ``head_width``, or ``width``.
+        Unspecified properties fall back to their defaults (e.g. ``color="r"``).
+
+    label_kwargs : dict, default: None
+        A dictionary of keyword arguments passed to ``ax.text()`` when drawing
+        the feature projection labels. Use this to override properties such as
+        ``color`` or ``fontsize``. Unspecified properties fall back to their
+        defaults (e.g. ``color="r"``).
 
     colors : list or tuple, default: None
         A single color to plot all instances as or a list of colors to color each
@@ -605,6 +638,8 @@ def pca_decomposition(
         scale=scale,
         projection=projection,
         proj_features=proj_features,
+        arrow_kwargs=arrow_kwargs,
+        label_kwargs=label_kwargs,
         colors=colors,
         colormap=colormap,
         alpha=alpha,
