@@ -362,6 +362,16 @@ class ModelVisualizer(Visualizer, Wrapper):
         self.estimator.set_params(**estimator_params)
         return super(ModelVisualizer, self).set_params(**params)
 
+    def __sklearn_is_fitted__(self):
+        """Delegate fitted check to wrapped estimator (required for sklearn 1.8+ Pipeline)."""
+        from sklearn.utils.validation import check_is_fitted
+        from sklearn.exceptions import NotFittedError
+        try:
+            check_is_fitted(self.estimator)
+            return True
+        except NotFittedError:
+            return False
+
     def fit(self, X, y=None, **kwargs):
         """
         Fits the wrapped estimator so that subclasses that override fit can

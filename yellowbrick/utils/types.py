@@ -20,13 +20,70 @@ Detection utilities for Scikit-Learn and Numpy types for flexibility
 import inspect
 import numpy as np
 
-from sklearn.base import BaseEstimator
+from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin, ClusterMixin
 from yellowbrick.contrib.wrapper import ContribEstimator
 
 
 ##########################################################################
 ## Model Type checking utilities
 ##########################################################################
+
+
+def _get_estimator_type(estimator):
+    """
+    Return the estimator type string for an estimator (class or instance).
+
+    Handles three generations of the sklearn API:
+    - legacy ``_estimator_type`` class attribute (pre-sklearn 1.6)
+    - ``__sklearn_tags__().estimator_type`` (sklearn 1.6+)
+    - Mixin-based subclass detection for uninstantiated classes
+    Also transparently unwraps Yellowbrick ``Wrapper`` instances so that
+    visualizers delegate to their inner estimator.
+    """
+    # ContribEstimator and pre-sklearn-1.6 estimators set _estimator_type explicitly
+    estimator_type = getattr(estimator, "_estimator_type", None)
+    if estimator_type is not None:
+        return estimator_type
+
+    # For uninstantiated classes use Mixin subclass detection
+    if inspect.isclass(estimator):
+        if issubclass(estimator, ClassifierMixin):
+            return "classifier"
+        if issubclass(estimator, RegressorMixin):
+            return "regressor"
+        if issubclass(estimator, ClusterMixin):
+            return "clusterer"
+        return None
+
+    # For Wrapper instances (e.g. ModelVisualizer / ScoreVisualizer),
+    # delegate to the wrapped estimator rather than the visualizer itself
+    # because the visualizer's own __sklearn_tags__ reports estimator_type=None
+    wrapped = object.__getattribute__(estimator, "__dict__").get("_wrapped")
+    if wrapped is not None and wrapped is not estimator:
+        return _get_estimator_type(wrapped)
+
+    # sklearn 1.6+ instances expose __sklearn_tags__()
+    if hasattr(estimator, "__sklearn_tags__"):
+        try:
+            etype = estimator.__sklearn_tags__().estimator_type
+            if etype is not None:
+                return etype
+        except Exception:
+            pass
+
+    # Final fallback: Mixin-based subclass check on the instance's class.
+    # Necessary when BaseEstimator precedes ClassifierMixin in the MRO (e.g.
+    # class Foo(BaseEstimator, ClassifierMixin)) causing BaseEstimator's
+    # __sklearn_tags__ to shadow ClassifierMixin's without calling super.
+    cls = type(estimator)
+    if issubclass(cls, ClassifierMixin):
+        return "classifier"
+    if issubclass(cls, RegressorMixin):
+        return "regressor"
+    if issubclass(cls, ClusterMixin):
+        return "clusterer"
+
+    return None
 
 
 def is_estimator(model):
@@ -64,9 +121,7 @@ def is_classifier(estimator):
     is_classifier
         `sklearn.is_classifier() <https://github.com/scikit-learn/scikit-learn/blob/master/sklearn/base.py#L518>`_
     """
-
-    # Test the _estimator_type property
-    return getattr(estimator, "_estimator_type", None) == "classifier"
+    return _get_estimator_type(estimator) == "classifier"
 
 
 # Alias for closer name to isinstance and issubclass
@@ -88,9 +143,7 @@ def is_regressor(estimator):
     is_regressor
         `sklearn.is_regressor() <https://github.com/scikit-learn/scikit-learn/blob/master/sklearn/base.py#L531>`_
     """
-
-    # Test the _estimator_type property
-    return getattr(estimator, "_estimator_type", None) == "regressor"
+    return _get_estimator_type(estimator) == "regressor"
 
 
 # Alias for closer name to isinstance and issubclass
@@ -107,9 +160,7 @@ def is_clusterer(estimator):
         The object to test if it is a Scikit-Learn clusterer, especially a
         Scikit-Learn estimator or Yellowbrick visualizer
     """
-
-    # Test the _estimator_type property
-    return getattr(estimator, "_estimator_type", None) == "clusterer"
+    return _get_estimator_type(estimator) == "clusterer"
 
 
 # Alias for closer name to isinstance and issubclass
