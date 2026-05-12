@@ -410,12 +410,12 @@ class PCA(ProjectionVisualizer):
         y_vector = self.pca_components_[1]
         max_x = max(Xp[:, 0])
         max_y = max(Xp[:, 1])
-        arrow_props = {"color": "r", "head_width": 0.05, "width": 0.005}
-        arrow_props.update(self.arrow_kwargs)
         label_props = {"color": "r"}
         label_props.update(self.label_kwargs)
 
         if self.projection == 2:
+            arrow_props = {"color": "r", "head_width": 0.05, "width": 0.005}
+            arrow_props.update(self.arrow_kwargs)
             for i in range(self.pca_components_.shape[1]):
                 self.ax.arrow(
                     x=0,
@@ -432,7 +432,9 @@ class PCA(ProjectionVisualizer):
                 )
         elif self.projection == 3:
             z_vector = self.pca_components_[2]
-            max_z = max(Xp[:, 1])
+            max_z = max(Xp[:, 2])
+            arrow_props = {"color": "r"}
+            arrow_props.update(self.arrow_kwargs)
             for i in range(self.pca_components_.shape[1]):
                 self.ax.plot(
                     [0, x_vector[i] * max_x],
