@@ -344,7 +344,7 @@ class ModelVisualizer(Visualizer, Wrapper):
         params = super(ModelVisualizer, self).get_params(deep=deep)
         for param in list(params.keys()):
             if param.startswith("estimator__"):
-                params[param[len("estimator__"):]] = params.pop(param)
+                params[param[len("estimator__") :]] = params.pop(param)
         return params
 
     def set_params(self, **params):
@@ -356,16 +356,14 @@ class ModelVisualizer(Visualizer, Wrapper):
         """
         estimator_keys = list(self.estimator.get_params(deep=False).keys())
         estimator_params = {
-            key: params.pop(key)
-            for key in estimator_keys
-            if key in params
+            key: params.pop(key) for key in estimator_keys if key in params
         }
 
         self.estimator.set_params(**estimator_params)
         return super(ModelVisualizer, self).set_params(**params)
 
     def __sklearn_is_fitted__(self):
-        """Delegate fitted check to wrapped estimator (required for sklearn 1.8+ Pipeline)."""
+        """Delegate fitted check to wrapped estimator (sklearn 1.8+ Pipeline)."""
         try:
             check_is_fitted(self.estimator)
             return True
@@ -564,8 +562,8 @@ class VisualizerGrid(Visualizer):
     @property
     def ax(self):
         """
-         Override Visualizer.ax to return the current axis
-         """
+        Override Visualizer.ax to return the current axis
+        """
         return plt.gca()
 
     @ax.setter

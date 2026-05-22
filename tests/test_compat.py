@@ -201,10 +201,12 @@ class TestModelVisualizerFittedState:
         X_train, X_test = X[:80], X[80:]
         y_train, y_test = y[:80], y[80:]
 
-        model = Pipeline([
-            ("imputer", SimpleImputer()),
-            ("viz", MinimalVisualizer(LinearRegression())),
-        ])
+        model = Pipeline(
+            [
+                ("imputer", SimpleImputer()),
+                ("viz", MinimalVisualizer(LinearRegression())),
+            ]
+        )
 
         model.fit(X_train, y_train)
         # This must not raise NotFittedError
@@ -216,9 +218,11 @@ class TestModelVisualizerFittedState:
         from sklearn.utils.validation import check_is_fitted
 
         X, y = make_regression(n_samples=50, n_features=4, random_state=0)
-        model = Pipeline([
-            ("viz", MinimalVisualizer(LinearRegression())),
-        ])
+        model = Pipeline(
+            [
+                ("viz", MinimalVisualizer(LinearRegression())),
+            ]
+        )
         model.fit(X, y)
         # Must not raise
         check_is_fitted(model)
@@ -228,9 +232,11 @@ class TestModelVisualizerFittedState:
         from sklearn.utils.validation import check_is_fitted
         from sklearn.exceptions import NotFittedError
 
-        model = Pipeline([
-            ("viz", MinimalVisualizer(LinearRegression())),
-        ])
+        model = Pipeline(
+            [
+                ("viz", MinimalVisualizer(LinearRegression())),
+            ]
+        )
         with pytest.raises(NotFittedError):
             check_is_fitted(model)
 
@@ -253,9 +259,9 @@ class TestNumpyCompat:
 
     def test_in1d_is_removed(self):
         """np.in1d no longer exists in NumPy 2.0+ (documents the removal)."""
-        assert not hasattr(np, "in1d"), (
-            "np.in1d exists — yellowbrick code should use np.isin instead"
-        )
+        assert not hasattr(
+            np, "in1d"
+        ), "np.in1d exists — yellowbrick code should use np.isin instead"
 
     def test_stack_requires_sequence_not_generator(self):
         """np.stack accepts lists but not bare generators in NumPy 2.0+."""
@@ -268,19 +274,19 @@ class TestNumpyCompat:
     def test_bytes_dtype_alias(self):
         """np.bytes_ is the correct alias (np.string_ was removed in 1.24)."""
         assert hasattr(np, "bytes_")
-        assert not hasattr(np, "string_"), (
-            "np.string_ exists — code should use np.bytes_ instead"
-        )
+        assert not hasattr(
+            np, "string_"
+        ), "np.string_ exists — code should use np.bytes_ instead"
 
     def test_str_dtype_alias(self):
         """np.str_ is the correct alias (np.unicode_ was removed in 1.24)."""
         assert hasattr(np, "str_")
-        assert not hasattr(np, "unicode_"), (
-            "np.unicode_ exists — code should use np.str_ instead"
-        )
+        assert not hasattr(
+            np, "unicode_"
+        ), "np.unicode_ exists — code should use np.str_ instead"
 
     def test_percentile_method_kwarg(self):
-        """np.percentile accepts 'method' kwarg (renamed from 'interpolation' in 1.22)."""
+        """np.percentile accepts 'method' kwarg (was 'interpolation' pre-1.22)."""
         data = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
         result = np.percentile(data, 50, method="nearest")
         assert result in data

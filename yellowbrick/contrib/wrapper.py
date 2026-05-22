@@ -39,6 +39,7 @@ OUTLIER_DETECTOR = "outlier_detector"
 ## Functional API
 ##########################################################################
 
+
 def wrap(estimator, estimator_type=None):
     """
     Wrap a third-party estimator that implements portions of the scikit-learn API to
@@ -99,6 +100,7 @@ def clusterer(estimator):
 ## ContribEstimator - Third Pary Estimator Wrapper
 ##########################################################################
 
+
 class ContribEstimator(object):
     """
     Wraps a third party estimator that implements the sckit-learn API and therefore
@@ -140,7 +142,10 @@ class ContribEstimator(object):
         try:
             return getattr(self.estimator, attr)
         except AttributeError:
-            raise YellowbrickAttributeError((
-                "estimator is missing the '{}' attribute, which is required for this "
-                "visualizer - please see the third party estimators documentation."
-            ).format(attr))
+            raise YellowbrickAttributeError(
+                (
+                    "estimator is missing the '{}' attribute, which is required "
+                    "for this visualizer - please see the third party estimators "
+                    "documentation."
+                ).format(attr)
+            )

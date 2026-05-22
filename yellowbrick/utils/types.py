@@ -120,8 +120,8 @@ def is_classifier(estimator):
 
     See also
     --------
-    is_classifier
-        `sklearn.is_classifier() <https://github.com/scikit-learn/scikit-learn/blob/master/sklearn/base.py#L518>`_
+    sklearn.base.is_classifier
+        Equivalent function in scikit-learn.
     """
     return _get_estimator_type(estimator) == "classifier"
 
@@ -142,8 +142,8 @@ def is_regressor(estimator):
 
     See also
     --------
-    is_regressor
-        `sklearn.is_regressor() <https://github.com/scikit-learn/scikit-learn/blob/master/sklearn/base.py#L531>`_
+    sklearn.base.is_regressor
+        Equivalent function in scikit-learn.
     """
     return _get_estimator_type(estimator) == "regressor"
 
