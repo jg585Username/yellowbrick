@@ -19,13 +19,9 @@ other estimators into Yellowbrick, while avoiding weird errors and issues.
 ## Imports
 ##########################################################################
 
-from yellowbrick.exceptions import YellowbrickAttributeError
+from sklearn.utils._tags import Tags, TargetTags, ClassifierTags, RegressorTags
 
-try:
-    from sklearn.utils._tags import Tags, TargetTags, ClassifierTags, RegressorTags
-    _HAS_SKLEARN_TAGS = True
-except ImportError:
-    _HAS_SKLEARN_TAGS = False
+from yellowbrick.exceptions import YellowbrickAttributeError
 
 
 ##########################################################################
@@ -130,27 +126,14 @@ class ContribEstimator(object):
             self._estimator_type = estimator_type
 
     def __sklearn_tags__(self):
-        """
-        Expose sklearn 1.6+ tags API, using _estimator_type to set the correct type.
-        Falls back to the wrapped estimator's tags if it supports them.
-        """
-        if _HAS_SKLEARN_TAGS:
-            # Try to get tags from the wrapped estimator first
-            if hasattr(self.estimator, "__sklearn_tags__"):
-                try:
-                    return self.estimator.__sklearn_tags__()
-                except Exception:
-                    pass
-            # Build tags from _estimator_type
-            etype = getattr(self, "_estimator_type", None)
-            tags = Tags(
-                estimator_type=etype,
-                target_tags=TargetTags(required=etype is not None),
-                classifier_tags=ClassifierTags() if etype == CLASSIFIER else None,
-                regressor_tags=RegressorTags() if etype == REGRESSOR else None,
-            )
-            return tags
-        raise AttributeError("__sklearn_tags__")
+        """sklearn 1.6+ tags API: build tags from _estimator_type."""
+        etype = getattr(self, "_estimator_type", None)
+        return Tags(
+            estimator_type=etype,
+            target_tags=TargetTags(required=etype is not None),
+            classifier_tags=ClassifierTags() if etype == CLASSIFIER else None,
+            regressor_tags=RegressorTags() if etype == REGRESSOR else None,
+        )
 
     def __getattr__(self, attr):
         # proxy to the wrapped object

@@ -19,6 +19,8 @@ import warnings
 import matplotlib.pyplot as plt
 
 from sklearn.base import BaseEstimator
+from sklearn.exceptions import NotFittedError
+from sklearn.utils.validation import check_is_fitted
 
 from yellowbrick.utils import get_model_name
 from yellowbrick.utils.wrapper import Wrapper
@@ -364,8 +366,6 @@ class ModelVisualizer(Visualizer, Wrapper):
 
     def __sklearn_is_fitted__(self):
         """Delegate fitted check to wrapped estimator (required for sklearn 1.8+ Pipeline)."""
-        from sklearn.utils.validation import check_is_fitted
-        from sklearn.exceptions import NotFittedError
         try:
             check_is_fitted(self.estimator)
             return True

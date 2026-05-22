@@ -27,7 +27,7 @@ from sklearn.cluster import KMeans
 from sklearn.naive_bayes import GaussianNB
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
-from sklearn.datasets import make_classification, make_regression
+from sklearn.datasets import make_regression
 
 from yellowbrick.utils.types import (
     is_classifier,

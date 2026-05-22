@@ -69,6 +69,8 @@ def _get_estimator_type(estimator):
             if etype is not None:
                 return etype
         except Exception:
+            # Some third-party estimators raise from __sklearn_tags__();
+            # fall through to the Mixin-based check below.
             pass
 
     # Final fallback: Mixin-based subclass check on the instance's class.
